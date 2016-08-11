@@ -21,7 +21,7 @@ Or install it yourself as:
 ## Usage
 
 ```ruby
-hash = InsensitiveHash.new(foo: { bar: 42 })
+hash = InsensitiveHash[foo: { bar: 42 }]
 hash['foo']['BAR'] # 42
 
 hash['foo'].merge!('Bar' => 79)
