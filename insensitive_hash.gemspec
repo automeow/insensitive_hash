@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Sam Boylett"]
   spec.email         = ["sam.boylett@alumni.york.ac.uk"]
 
-  spec.summary       = %q{A hash where :foo, 'foo', :Foo and 'FOO' are all equal keys}
+  spec.summary       = %q{A hash where :foo, 'foo', :Foo and 'FOO' are all equal keys, as are '1' and 1}
   spec.homepage      = "https://github.com/automeow/insensitive_hash"
   spec.license       = "MIT"
 

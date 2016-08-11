@@ -9,10 +9,13 @@ class InsensitiveHashTest < Minitest::Test
   end
 
   def test_insensitivity
-    hash = InsensitiveHash.new(foo: 42)
+    hash = InsensitiveHash.new(foo: 42, 1 => :bar)
 
     TEST_KEYS_FOO.each{ |k| assert_equal 42, hash[k] }
     assert_nil hash[:bar]
+
+    assert_equal :bar, hash[1]
+    assert_equal :bar, hash['1']
   end
 
   def test_merge
