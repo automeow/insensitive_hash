@@ -9,7 +9,7 @@ class InsensitiveHashTest < Minitest::Test
   end
 
   def test_insensitivity
-    hash = InsensitiveHash.new(foo: 42, 1 => :bar)
+    hash = InsensitiveHash[foo: 42, 1 => :bar]
 
     TEST_KEYS_FOO.each{ |k| assert_equal 42, hash[k] }
     assert_nil hash[:bar]
@@ -19,7 +19,7 @@ class InsensitiveHashTest < Minitest::Test
   end
 
   def test_merge
-    hash = InsensitiveHash.new(foo: 42)
+    hash = InsensitiveHash[foo: 42]
 
     TEST_KEYS_FOO.each{ |k| assert_equal 71, hash.merge(k => 71)[:foo] }
     TEST_KEYS_FOO.each{ |k| assert_equal 42, hash[k] }
@@ -31,11 +31,35 @@ class InsensitiveHashTest < Minitest::Test
   end
 
   def test_sub_hash
-    hash = InsensitiveHash.new(foo: { bar: 42 })
+    hash = InsensitiveHash[foo: { bar: 42 }]
     TEST_KEYS_FOO.each do |f|
       TEST_KEYS_BAR.each do |b|
         assert_equal 42, hash[f][b]
       end
+    end
+  end
+
+  def test_default
+    hash = InsensitiveHash.new(42)
+    assert_equal 42, hash[:foo]
+  end
+
+  def test_set_encoder
+    hash = InsensitiveHash.new
+    hash.encoder = :to_s
+    hash[:foo] = 42
+    assert_equal 42, hash[:foo]
+    assert_equal 42, hash['foo']
+    assert_nil hash[:Foo]
+    assert_nil hash['Foo']
+
+    hash = InsensitiveHash.new
+    hash.encoder = ->(k){ "#{k}_bar" }
+    hash[:foo] = 42
+    assert_equal "foo_bar", hash.keys.first
+
+    assert_raises ArgumentError do
+      hash.encoder = 1
     end
   end
 end

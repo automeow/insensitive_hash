@@ -1,11 +1,30 @@
 require "insensitive_hash/version"
 
 class InsensitiveHash < Hash
-  def initialize(*args)
-    return super(*args) unless args[0].is_a?(Hash)
-    args.shift.tap{ super(*args) }.each do |k, v|
-      self[k] = v.is_a?(Hash) ? self.class.new(v) : v
+  attr_reader :encoder
+
+  def initialize(*args, &block)
+    @encoder = ->(k){ k.to_s.downcase }
+    super
+  end
+
+  def self.[](hash)
+    InsensitiveHash.new.tap do |ih|
+      super(hash).each do |k, v|
+        ih[k] = v.is_a?(Hash) ? self[v] : v
+      end
     end
+  end
+
+  def encoder=(proc)
+    @encoder =
+      if proc.respond_to?(:call)
+        proc
+      elsif proc.respond_to?(:to_proc)
+        proc.to_proc
+      else
+        raise ArgumentError, "encoder must respond to :call or :to_proc"
+      end
   end
 
   def [](key)
@@ -20,12 +39,12 @@ class InsensitiveHash < Hash
     super(fix_key(key), value)
   end
 
-  def delete(key)
-    super(fix_key(key))
+  def delete(key, &block)
+    super(fix_key(key), &block)
   end
 
-  def fetch(key)
-    super(fix_key(key))
+  def fetch(key, &block)
+    super(fix_key(key), &block)
   end
 
   def has_key?(key)
@@ -45,27 +64,27 @@ class InsensitiveHash < Hash
   end
 
   def invert
-    self.class.new(super)
+    self.class[super]
   end
 
-  def merge!(hash)
-    super(self.class.new(hash))
+  def merge!(hash, &block)
+    super(self.class[hash], &block)
   end
 
-  def merge(hash)
-    super(self.class.new(hash))
+  def merge(hash, &block)
+    super(self.class[hash], &block)
   end
 
   def eql?(hash)
-    super(self.class.new(hash))
+    super(self.class[hash])
   end
 
   def replace(hash)
-    super(self.class.new(hash))
+    super(self.class[hash])
   end
 
-  def update(hash)
-    super(self.class.new(hash))
+  def update(hash, &block)
+    super(self.class[hash], &block)
   end
 
   def values_at(*keys)
@@ -74,6 +93,6 @@ class InsensitiveHash < Hash
 
   private
     def fix_key(k)
-      k.to_s.downcase
+      encoder.call(k)
     end
 end
